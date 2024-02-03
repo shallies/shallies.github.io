@@ -1,57 +1,99 @@
+var oPlay, oResrc, oDrama;
 var ajax;
-if(window.XMLHttpRequest)
-	ajax=new XMLHttpRequest();
-else
-{
-	ajax=new ActiveXObject("Microsoft.XMLHTTP");
-	if(!ajax)ajax=new ActiveXObject("Msxml2.XMLHTTP");
+window.onload=function(){
+	if(window.XMLHttpRequest)
+		ajax=new XMLHttpRequest();
+	else
+	{
+		ajax=new ActiveXObject("Microsoft.XMLHTTP");
+		if(!ajax)ajax=new ActiveXObject("Msxml2.XMLHTTP");
+	}
+
+	if(ajax)
+	{
+		ajax.onreadystatechange=processPlay;
+
+		ajax.open("GET","play.lst",true);
+		ajax.setRequestHeader("Content-Type","text/plain; charset=utf-8");
+		ajax.setRequestHeader("Cache-Control","no-cache");
+		ajax.send();
+	}
 }
 
-if(ajax)
+function processPlay()
 {
-	ajax.onreadystatechange=function()
+	if(ajax.readyState == 4 && ajax.status == 200)
 	{
-		if(ajax.readyState == 4 && ajax.status == 200)
+		try
 		{
-			try
-			{
-				var vList=ajax.responseText.split(/[\r\n]+/);
-				var vHTML="", vLine, vIndex=0;
+			var vHTML="", vIndex=0;
+			oPlay=JSON.parse(ajax.responseText);
+			oResrc=document.getElementById("oResource");
+			cur=getCookie("oResource");
+			for(var i=0;i<oPlay.resource.length;i++)
+				if(cur==oPlay.resource[i].name)
+					vHTML+='<option value="'+oPlay.resource[i].url+'" selected>'+oPlay.resource[i].name+'</option>';
+				else
+					vHTML+='<option value="'+oPlay.resource[i].url+'">'+oPlay.resource[i].name+'</option>';
+			oResrc.innerHTML=vHTML;
 
-				var idCur=getCookie(document.all.oName.value);
-				for(var i=1; i<vList.length; i++)
+			oDrama=document.getElementById("oDrama");
+			cur=getCookie("oDrama");
+			vHTML="";
+			for(var i=0;i<oPlay.drama.length;i++)
+				if(cur==oPlay.drama[i].name)
 				{
-					vLine=vList[i].split(",");
-					if(vLine.length==2)
-					{
-						if(i%3==1)vHTML+="<tr>";
-						vHTML+="<td><a id=\"LNK"+vIndex+"\" href=\""+vLine[1]+"\" onclick=\"naviLink(this);return false;\""+(idCur=="LNK"+vIndex?"class=\"current\"":"")+">"+vLine[0]+"</a></td>";
-						if(i%3==0)vHTML+="</tr>";
-						vIndex++;
-					}
+					vHTML+='<option value="'+i+'" selected>'+oPlay.drama[i].name+'</option>';
+					cur=getCookie(oPlay.drama[i].name);
+					vIndex=i;
 				}
-				if(vHTML!="")vHTML="<table>"+vHTML+"</table>"
+				else
+					vHTML+='<option value="'+i+'">'+oPlay.drama[i].name+'</option>';
+			oDrama.innerHTML=vHTML;
+			changeDrama();
+		}
+		catch(err){}
+	}
+}
 
-				document.all.LNK.setAttribute("base", vList[0]);
-				document.all.oList.innerHTML=vHTML;
-			}
-			catch(err){}
+function changeResource()
+{
+	for(var i=0; i<oResrc.length; i++)
+	{
+		if(oResrc[i].selected)
+		{
+			setCookie(oResrc.id, oResrc[i].innerText);
+			return;
 		}
 	}
 }
 
-function changeName(oSel)
+function changeDrama()
 {
-	if(oSel)
-		setCookie(oSel.id, oSel.value);
-	else
-		oSel=document.all.oName;
+	var vHTML="", cur="", vIndex=0;
+	for(var i=0; i<oDrama.length; i++)
+	{
+		if(oDrama[i].selected)
+		{
+			setCookie(oDrama.id, oDrama[i].innerText);
+			cur=getCookie(oDrama[i].innerText);
+			vIndex=i;
+			break;
+		}
+	}
 
-	ajax.open("GET","play/"+oSel.value,true);
-	ajax.setRequestHeader("Content-Type","text/plain; charset=utf-8");
-	ajax.setRequestHeader("Cache-Control","no-cache");
-	ajax.send();
+	for(var i=0;i<oPlay.drama[vIndex].episode.length;i++)
+	{
+		if(i%3==0)vHTML+="<tr>";
+		vHTML+='<td><a id="LNK'+i+'" href="'+oPlay.drama[vIndex].episode[i].url+'" onclick="naviLink(this);return false;"'+(cur=='LNK'+i?'class="current"':'')+'>'+oPlay.drama[vIndex].episode[i].title+'</a></td>';
+		if(i%3==2)vHTML+="</tr>";
+	}
+	if(i%3==2)vHTML+="</tr>";
+	if(vHTML!="")vHTML="<table>"+vHTML+"</table>"
+	document.all.LNK.setAttribute("base", oPlay.drama[vIndex].base);
+	document.all.oEpisode.innerHTML=vHTML;
 }
+
 function setCookie(cName, cValue)
 {
 	var nDays=60;
@@ -60,6 +102,7 @@ function setCookie(cName, cValue)
 	var vExpires = "expires="+d.toGMTString();
 	document.cookie = cName + "=" + cValue + "; " + vExpires;
 }
+
 function getCookie(cName)
 {
 	var vName = cName + "=";
@@ -71,35 +114,29 @@ function getCookie(cName)
 	}
 	return "";
 }
-function initSelection(oSel)
-{
-	var sVal=getCookie(oSel.id);
-	if(sVal!="")
-		for(var i=0;i<oSel.length;i++)
-			if(oSel[i].value==sVal)
-			{
-				oSel[i].selected = true;
-				return;
-			}
 
-	oSel[0].selected=true;
-}
 function naviLink(oLink)
 {
+	var sDrama=""
+	for(var i=0; i<oDrama.length; i++)
+	{
+		if(oDrama[i].selected)
+		{
+			sDrama=oDrama[i].innerText;
+			break;
+		}
+	}
+
 	try
 	{
-		var id=getCookie(document.all.oName.value);
+		var id=getCookie(sDrama);
 		if(id!="")document.getElementById(id).classList.remove("current");
 
 		oLink.classList.add("current");
-		setCookie(oName.value, oLink.id);
+		setCookie(sDrama, oLink.id);
 
-		document.all.LNK.href=document.all.oSource.value+document.all.LNK.getAttribute("base")+oLink.getAttribute("href");
+		document.all.LNK.href=document.all.oResource.value+document.all.LNK.getAttribute("base")+oLink.getAttribute("href");
 		document.all.LNK.click();
 	}
 	catch(err){}
 }
-
-initSelection(document.all.oSource);
-initSelection(document.all.oName);
-changeName();

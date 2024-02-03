@@ -2,39 +2,28 @@
 <meta http-equiv="content-type" content="text/html;charset=utf-8" />
 <link rel="icon" href="play.png" type="image/png" />
 <style>
-	select{font-size:32px;color:#000080;width:100%;border:0;background:#FFFFFF}
 	table{border:0;font-size:32px;width:100%}
 	td{padding:10px 20px;vertical-align:top}
-	.tdlbl {width:96px;padding:0;background-color:#CCCCFF;border-radius:0 16px;text-align:center}
-	.tddrp {width:calc(50% - 96px);padding:0 10px;border-bottom:2px solid #CCCCFF}
-	#oList{font-size:32px;color:#000080;padding:16px 16px 0;width:calc(100% - 32px);height:calc(100% - 64px);overflow-x:hidden;overflow-y:auto}
+	.tdlbl {width:96px;padding:0;background-color:#CCCCFF;border-radius:0 16px;text-align:center;vertical-align:middle}
+	.tddrp {width:calc(50% - 96px);padding:0 10px;border-bottom:2px solid #CCCCFF;vertical-align:middle}
+	#oEpisode{font-size:32px;color:#000080;padding:16px 16px 0;width:calc(100% - 32px);height:calc(100% - 64px);overflow-x:hidden;overflow-y:auto}
+	select{font-size:32px;color:#000080;width:100%;border:0;background:#FFFFFF}
 	a,a:visited{text-decoration:none;color:#0000CC}
-	a:hover{color:#FF0000}
 	a.current{background-color:#FFCC33}
+	a:hover{color:#FF0000}
 </style>
 <title>在线影院</title>
+<script type="text/javascript" src="play.js"></script>
 </head>
 <body style="margin-top:20px;overflow:hidden !important">
 <table>
-<tr style="height:48px"><td nowrap class="tdlbl">片源</td><td class="tddrp"><select id=oSource onchange="setCookie(this.id, this.value);">
-	<option value="https://vip.parwix.com:4433/player/?url=">综合/B站</option>
-	<option value="https://z1.m1907.cn/?jx=">纯净/B站</option>
-	<option value="https://jx.xmflv.com/?url=">虾米</option>
-	<option value="https://okjx.cc/?url=">OK解析</option>
-	<option value="https://jsap.attakids.com/?url=">高速接口</option>
-	<option value="https://jx.aidouer.net/?url=">爱豆</option>
+<tr style="height:48px"><td nowrap class="tdlbl">片源</td><td class="tddrp"><select id=oResource onchange="changeResource();">
+<option>---请选择---</option>
 </select></td><td style="width:5px"></td>
-<td nowrap class="tdlbl">节目</td><td class="tddrp"><select id=oName onchange="changeName(this);">
-	<option value="ds.lst">对手</option>
-	<option value="ssxs.lst">谁是凶手</option>
-	<option value="kd.lst">开端</option>
-	<option value="zjnt.lst">在劫难逃</option>
-	<option value="jzlm.lst">江照黎明</option>
-	<option value="tj.lst">淘金</option>
-	<option value="rzqdj.lst">入住请登记</option>
+<td nowrap class="tdlbl">节目</td><td class="tddrp"><select id=oDrama onchange="changeDrama();">
+<option>---请选择---</option>
 </select></td></tr>
 </table>
-<div id=oList align=center></div>
+<div id=oEpisode align=center></div>
 <a id="LNK" href="#" target="_blank" style="display:none">HiddenAnchor</a>
-<script type="text/javascript" src="play.js"></script>
 </body></html>
